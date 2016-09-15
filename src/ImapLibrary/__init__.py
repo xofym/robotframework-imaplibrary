@@ -275,7 +275,7 @@ class ImapLibrary(object):
         | Open Mailbox | host=HOST | user=USER | password=SECRET | port=8000 |
         """
         host = kwargs.pop('host', kwargs.pop('server', None))
-        is_secure = kwargs.pop('is_secure', True)
+        is_secure = kwargs.pop('is_secure', 'True') == 'True'
         port = int(kwargs.pop('port', self.PORT_SECURE if is_secure else self.PORT))
         self._imap = IMAP4_SSL(host, port) if is_secure else IMAP4(host, port)
         self._imap.login(kwargs.pop('user', None), kwargs.pop('password', None))
