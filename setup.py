@@ -44,11 +44,12 @@ setup(
     license='Apache License, Version 2.0',
     classifiers=[
         'Development Status :: 4 - Beta',
+        'Framework :: Robot Framework',
         'Intended Audience :: Developers',
-        'Topic :: Software Development :: Testing',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.5',
+        'Topic :: Software Development :: Testing',
     ],
     keywords='robot framework testing automation imap email mail softwaretesting',
     platforms='any',

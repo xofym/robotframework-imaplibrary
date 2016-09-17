@@ -163,7 +163,7 @@ ImapLibrary must be imported into your Robot test suite.
 .. code:: robotframework
 
     *** Settings ***
-    Library  ImapLibrary
+    Library    ImapLibrary
 
 See `Robot Framework User Guide`_ for more information.
 
