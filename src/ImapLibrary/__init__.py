@@ -302,9 +302,11 @@ class ImapLibrary(object):
         - ``text``: Email body text. (Default None)
         - ``timeout``: The maximum value in seconds to wait for email message to arrived.
                        (Default 60)
+        - ``folder``: The email folder to check for emails. (Default INBOX)
 
         Examples:
         | Wait For Email | sender=noreply@domain.com |
+        | Wait For Email | sender=noreply@domain.com | folder=OUTBOX
         """
         poll_frequency = float(kwargs.pop('poll_frequency', 10))
         timeout = int(kwargs.pop('timeout', 60))
@@ -349,9 +351,10 @@ class ImapLibrary(object):
 
     def _check_emails(self, **kwargs):
         """Returns filtered email."""
+        folder = '"%s"' % str(kwargs.pop('folder', self.FOLDER))
         criteria = self._criteria(**kwargs)
         # Calling select before each search is necessary with gmail
-        status, data = self._imap.select()
+        status, data = self._imap.select(folder)
         if status != 'OK':
             raise Exception("imap.select error: %s, %s" % (status, data))
         typ, msgnums = self._imap.search(None, *criteria)
