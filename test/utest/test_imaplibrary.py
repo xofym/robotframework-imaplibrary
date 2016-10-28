@@ -42,6 +42,8 @@ class ImapLibraryTests(unittest.TestCase):
         self.subject = 'subject'
         self.text = 'text'
         self.username = 'username'
+        self.folder = 'INBOX'
+        self.folder_check = '"INBOX"'
 
     def test_should_have_default_values(self):
         """Imap library instance should have default values set."""
@@ -54,6 +56,7 @@ class ImapLibraryTests(unittest.TestCase):
         self.assertIsNone(self.library._part)
         self.assertEqual(self.library.PORT, self.port)
         self.assertEqual(self.library.PORT_SECURE, self.port_secure)
+        self.assertEqual(self.library.FOLDER, self.folder)
 
     @mock.patch('ImapLibrary.IMAP4_SSL')
     def test_should_open_secure_mailbox(self, mock_imap):
@@ -64,7 +67,7 @@ class ImapLibraryTests(unittest.TestCase):
                                   password=self.password)
         mock_imap.assert_called_with(self.server, self.port_secure)
         self.library._imap.login.assert_called_with(self.username, self.password)
-        self.library._imap.select.assert_called_with()
+        self.library._imap.select.assert_called_with(self.folder_check)
 
     @mock.patch('ImapLibrary.IMAP4_SSL')
     def test_should_open_secure_mailbox_with_custom_port(self, mock_imap):
@@ -75,7 +78,18 @@ class ImapLibraryTests(unittest.TestCase):
                                   password=self.password, port=8000)
         mock_imap.assert_called_with(self.server, 8000)
         self.library._imap.login.assert_called_with(self.username, self.password)
-        self.library._imap.select.assert_called_with()
+        self.library._imap.select.assert_called_with(self.folder_check)
+
+    @mock.patch('ImapLibrary.IMAP4_SSL')
+    def test_should_open_secure_mailbox_with_custom_folder(self, mock_imap):
+        """Open mailbox should open secure connection to IMAP server with
+        requested credentials to a custom folder
+        """
+        self.library.open_mailbox(host=self.server, user=self.username,
+                                  password=self.password, folder='Outbox')
+        mock_imap.assert_called_with(self.server, self.port_secure)
+        self.library._imap.login.assert_called_with(self.username, self.password)
+        self.library._imap.select.assert_called_with('"Outbox"')
 
     @mock.patch('ImapLibrary.IMAP4_SSL')
     def test_should_open_secure_mailbox_with_server_key(self, mock_imap):
@@ -86,7 +100,7 @@ class ImapLibraryTests(unittest.TestCase):
                                   password=self.password)
         mock_imap.assert_called_with(self.server, self.port_secure)
         self.library._imap.login.assert_called_with(self.username, self.password)
-        self.library._imap.select.assert_called_with()
+        self.library._imap.select.assert_called_with(self.folder_check)
 
     @mock.patch('ImapLibrary.IMAP4')
     def test_should_open_non_secure_mailbox(self, mock_imap):
@@ -97,7 +111,7 @@ class ImapLibraryTests(unittest.TestCase):
                                   password=self.password, is_secure=False)
         mock_imap.assert_called_with(self.server, self.port)
         self.library._imap.login.assert_called_with(self.username, self.password)
-        self.library._imap.select.assert_called_with()
+        self.library._imap.select.assert_called_with(self.folder_check)
 
     @mock.patch('ImapLibrary.IMAP4_SSL')
     def test_should_return_email_index(self, mock_imap):
@@ -254,7 +268,7 @@ class ImapLibraryTests(unittest.TestCase):
             self.library.wait_for_email(sender=self.sender, poll_frequency=0.2,
                                         timeout=0.3)
             self.assertTrue("No email received within 0s" in context.exception)
-        self.library._imap.select.assert_called_with()
+        self.library._imap.select.assert_called_with(self.folder_check)
 
     @mock.patch('ImapLibrary.IMAP4_SSL')
     def test_should_raise_exception_on_select_error(self, mock_imap):
