@@ -1,3 +1,9 @@
+0.2.5 (2016.10.31)
+==================
+
+* Added custom folder support for `Open Mailbox` and `Wait For Email`.
+  Thanks to @jhoward321
+
 0.2.4 (2016.09.17)
 ==================
 
@@ -24,7 +30,8 @@
 * Adjust documentation
 * Add more unit test
 * Add backward compatible support
-* Add `Delete All Emails`, `Delete Email`, `Mark All Emails As Read`, and `Mark Email As Read` keywords
+* Add `Delete All Emails`, `Delete Email`, `Mark All Emails As Read`,
+  and `Mark Email As Read` keywords
 * Add alternative keyword to deprecated keywords
 
 0.2.0 (2015.12.15)
