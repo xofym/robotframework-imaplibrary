@@ -68,6 +68,7 @@ class ImapLibrary(object):
 
     PORT = 143
     PORT_SECURE = 993
+    FOLDER = 'INBOX'
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
     ROBOT_LIBRARY_VERSION = __version__
 
@@ -268,18 +269,21 @@ class ImapLibrary(object):
         - ``password``: The plaintext password to be use to authenticate mailbox on given ``host``.
         - ``port``: The IMAP port number. (Default None)
         - ``user``: The username to be use to authenticate mailbox on given ``host``.
+        - ``folder``: The email folder to read from. (Default INBOX)
 
         Examples:
         | Open Mailbox | host=HOST | user=USER | password=SECRET |
         | Open Mailbox | host=HOST | user=USER | password=SECRET | is_secure=False |
         | Open Mailbox | host=HOST | user=USER | password=SECRET | port=8000 |
+        | Open Mailbox | host=HOST | user=USER | password=SECRET | folder=Drafts
         """
         host = kwargs.pop('host', kwargs.pop('server', None))
         is_secure = kwargs.pop('is_secure', 'True') == 'True'
         port = int(kwargs.pop('port', self.PORT_SECURE if is_secure else self.PORT))
+        folder = '"%s"' % str(kwargs.pop('folder', self.FOLDER))
         self._imap = IMAP4_SSL(host, port) if is_secure else IMAP4(host, port)
         self._imap.login(kwargs.pop('user', None), kwargs.pop('password', None))
-        self._imap.select()
+        self._imap.select(folder)
         self._init_multipart_walk()
 
     def wait_for_email(self, **kwargs):
@@ -298,9 +302,11 @@ class ImapLibrary(object):
         - ``text``: Email body text. (Default None)
         - ``timeout``: The maximum value in seconds to wait for email message to arrived.
                        (Default 60)
+        - ``folder``: The email folder to check for emails. (Default INBOX)
 
         Examples:
         | Wait For Email | sender=noreply@domain.com |
+        | Wait For Email | sender=noreply@domain.com | folder=OUTBOX
         """
         poll_frequency = float(kwargs.pop('poll_frequency', 10))
         timeout = int(kwargs.pop('timeout', 60))
@@ -345,9 +351,10 @@ class ImapLibrary(object):
 
     def _check_emails(self, **kwargs):
         """Returns filtered email."""
+        folder = '"%s"' % str(kwargs.pop('folder', self.FOLDER))
         criteria = self._criteria(**kwargs)
         # Calling select before each search is necessary with gmail
-        status, data = self._imap.select()
+        status, data = self._imap.select(folder)
         if status != 'OK':
             raise Exception("imap.select error: %s, %s" % (status, data))
         typ, msgnums = self._imap.search(None, *criteria)
