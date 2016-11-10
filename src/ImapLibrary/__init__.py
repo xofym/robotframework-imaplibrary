@@ -129,7 +129,10 @@ class ImapLibrary(object):
         if self._is_walking_multipart(email_index):
             body = self.get_multipart_payload(decode=True)
         else:
-            body = self._imap.uid('fetch', email_index, '(BODY[TEXT])')[1][0][1].decode('quoted-printable')
+            body = self._imap.uid('fetch',
+                                  email_index,
+                                  '(BODY[TEXT])')[1][0][1].\
+                decode('quoted-printable')
         return body
 
     def get_links_from_email(self, email_index):
