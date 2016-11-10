@@ -101,7 +101,7 @@ class ImapLibrary(object):
         | Delete All Emails |
         """
         for mail in self._mails:
-            self._imap.store(mail, '+FLAGS', r'\DELETED')
+            self.delete_email(mail)
         self._imap.expunge()
 
     def delete_email(self, email_index):
@@ -113,7 +113,7 @@ class ImapLibrary(object):
         Examples:
         | Delete Email | INDEX |
         """
-        self._imap.store(email_index, '+FLAGS', r'\DELETED')
+        self._imap.uid('store', email_index, '+FLAGS', r'(\DELETED)')
         self._imap.expunge()
 
     def get_email_body(self, email_index):
@@ -129,7 +129,10 @@ class ImapLibrary(object):
         if self._is_walking_multipart(email_index):
             body = self.get_multipart_payload(decode=True)
         else:
-            body = self._imap.fetch(email_index, '(BODY[TEXT])')[1][0][1].decode('quoted-printable')
+            body = self._imap.uid('fetch',
+                                  email_index,
+                                  '(BODY[TEXT])')[1][0][1].\
+                decode('quoted-printable')
         return body
 
     def get_links_from_email(self, email_index):
@@ -210,7 +213,7 @@ class ImapLibrary(object):
         | Mark All Emails As Read |
         """
         for mail in self._mails:
-            self._imap.store(mail, '+FLAGS', r'\SEEN')
+            self._imap.uid('store', mail, '+FLAGS', r'\SEEN')
 
     def mark_as_read(self):
         """****DEPRECATED****
@@ -227,7 +230,7 @@ class ImapLibrary(object):
         Examples:
         | Mark Email As Read | INDEX |
         """
-        self._imap.store(email_index, '+FLAGS', r'\SEEN')
+        self._imap.uid('store', email_index, '+FLAGS', r'\SEEN')
 
     def open_link_from_email(self, email_index, link_index=0):
         """Open link URL from given ``link_index`` in email message body of given ``email_index``.
@@ -338,7 +341,7 @@ class ImapLibrary(object):
         | Walk Multipart Email | INDEX |
         """
         if not self._is_walking_multipart(email_index):
-            data = self._imap.fetch(email_index, '(RFC822)')[1][0][1]
+            data = self._imap.uid('fetch', email_index, '(RFC822)')[1][0][1]
             msg = message_from_string(data)
             self._start_multipart_walk(email_index, msg)
         try:
@@ -357,7 +360,7 @@ class ImapLibrary(object):
         status, data = self._imap.select(folder)
         if status != 'OK':
             raise Exception("imap.select error: %s, %s" % (status, data))
-        typ, msgnums = self._imap.search(None, *criteria)
+        typ, msgnums = self._imap.uid('search', None, *criteria)
         if typ != 'OK':
             raise Exception('imap.search error: %s, %s, criteria=%s' % (typ, msgnums, criteria))
         return msgnums[0].split()
