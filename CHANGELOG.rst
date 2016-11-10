@@ -1,3 +1,9 @@
+0.3.0 (2016.11.09)
+==================
+
+* Use imaplib `uid` function to avoid races with concurrent IMAP clients.
+  Thanks to @gsikorski
+
 0.2.5 (2016.10.31)
 ==================
 
